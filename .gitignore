@@ -1,0 +1,19 @@
+# Ignore CelebA dataset
+celeba/
+celeba/*
+
+# Ignore numpy dumps
+*.npy
+*.npz
+
+# Ignore intermediate logs, caches, and temp files
+*.log
+*.pkl
+*.pt
+*.pth
+__pycache__/
+*.pyc
+
+# Ignore virtual environment
+venv/
+.DS_Store
