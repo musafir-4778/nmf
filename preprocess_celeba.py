@@ -105,3 +105,8 @@ for split_name, pval, limit in [("train",0,limit_train),("val",1,limit_val),("te
     np.save(os.path.join(OUT_DIR, f"young_{split_name}.npy"), Y_young)
     np.save(os.path.join(OUT_DIR, f"smiling_{split_name}.npy"), Y_smile)
     print(split_name, "->", X.shape, Y_young.mean(), Y_smile.mean())
+
+
+
+
+

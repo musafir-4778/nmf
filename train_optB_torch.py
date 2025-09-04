@@ -136,3 +136,18 @@ print(f"[H3] Clustering: K={CLUST_K} | silhouette={sil:.3f} | time={time.time()-
 
 print("[DONE]")
 print("\n[WATERMARK] Implementation by Lakshya Yadav (@lakshyayadav)")
+
+
+def project_layers_val(X, Zs, iters=40, device=DEVICE):
+    Z1,Z2,Z3 = Zs
+    # multiplicative NNLS-ish per layer (H≥0) with NaN guards
+    def proj(Z, X, iters):
+        H = torch.rand(Z.shape[1], X.shape[1], device=device).clamp_min_(1e-6)
+        for _ in range(iters):
+            ZtX, ZtZ = Z.t() @ X, Z.t() @ Z
+            np_, nn_ = _pos_neg(ZtX); dp, dn = _pos_neg(ZtZ @ H)
+            H = H * torch.sqrt((np_ + dn) / (nn_ + dp + 1e-12))
+            H = torch.nan_to_num(H, nan=0.0, posinf=1e6, neginf=0.0).clamp_min_(1e-12)
+        return H
+    H1 = proj(Z1, X, iters); H2 = proj(Z2, H1, iters//2); H3 = proj(Z3, H2, iters//2)
+    return H1, H2

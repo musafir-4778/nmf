@@ -159,3 +159,16 @@ def deep_finetune_torch(X, Zs, Hs, graphs=None, lams=None, iters=100):
         Hs[0] = H1
 
     return Zs, Hs
+
+
+
+
+# Z update (ridge-stable solve): Z = (X Hᵀ) (H Hᵀ + λI)⁻¹
+HHt = H @ H.t(); RHS = X @ H.t()
+Z   = _solve_right_spd(HHt, RHS, lam=1e-3)  # Cholesky + jitter, no pinv
+
+# H update (nonnegative multiplicative)
+ZtX = Z.t() @ X; ZtZ = Z.t() @ Z
+num_p,num_n = _pos_neg(ZtX); den_p,den_n = _pos_neg(ZtZ @ H)
+H = H * torch.sqrt((num_p + den_n) / (num_n + den_p + 1e-12))
+H = torch.nan_to_num(H, nan=0.0, posinf=1e6, neginf=0.0).clamp_min_(1e-12)
